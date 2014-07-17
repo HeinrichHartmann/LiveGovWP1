@@ -1,32 +1,24 @@
-LiveGovWP1
-==========
+MORA - Mobile Reality Analysis Toolkit
+======================================
 
-Live+Gov WP1 Reality Sensing and Mining
+The MORA toolkit allows simple recording of sensor data from Android
+mobile phones, transfer to a server and inspection of the recorded
+samples using a web front end.
 
-For more information consult:
-* [Project Wiki](https://github.com/HeinrichHartmann/LiveGovWP1/wiki) for Architecture Overview, Requirements and API Definition
-* Readme files in subdirectories for deployment information
-* [Presentation about Sensor Collector](http://heinrichhartmann.github.io/LiveGovWP1/) by Christoph Ehlen
-* [JavaDocs](http://heinrichhartmann.github.io/LiveGovWP1/docs/DocMobile/)
-
-Service Endpotins:
-* [Upload Servlet API](http://liveandgov.uni-koblenz.de/storage/upload)
-* [Service Line Detection API](http://liveandgov.uni-koblenz.de/SLD/api)
-* [Human Activity Recognition API](http://liveandgov.uni-koblenz.de/HAR/api)
-
-Testing Tools:
-* [Data Inspection Front End](http://liveandgov.uni-koblenz.de/storage/inspection)
-* [Service Line Detection Test](http://liveandgov.uni-koblenz.de/SLD/test)
+### Components
+* Mobile Sensor Collector (Android Library)
+* Storage REST Endpoint (Java Servlet)
+* Web-Inspection front end (Node-JS Servlet)
 
 ### Contributors:
 * [Heinrich Hartmann](https://github.com/HeinrichHartmann)
-* Christoph Schaefer
+* [Christoph Schaefer](https://github.com/chrip)
 * Richard Schütz
 * [Christoph Ehlen](https://github.com/cEhlen)
 * [Lukas Härtel](https://github.com/lukashaertel)
 * [René Wilhelm](https://github.com/rwilhelm/)
 
 ### Acknowledgements:
-This software is part of the [Live+Gov](http://liveandgov.eu) project and is financially supported by
+This software was initiated during the [Live+Gov](http://liveandgov.eu) project which is supported by
 * The European Commission [Seventh Framework Programme](http://cordis.europa.eu/fp7/home_en.html)
 * [University of Koblenz-Landau](http://www.uni-koblenz-landau.de/)
