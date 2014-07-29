@@ -1,13 +1,17 @@
-MORA Library
-============
+MORA - A toolkit for data collection and analysis for mobile phones
+===================================================================
 
-* Introduction
+* Abstract (HH)
 
-* Related Work
-  - FUNF
-  - SDCF
+* Introduction (MT)
+  - Quantified Self
+  - Internet of Things
 
-* Component Description
+* Background
+  - Sensors
+  - Technologies (Android)
+
+* Component Description (CS, HH)
   - Mobile Component
   - SSF Format
   - REST Endpoint
@@ -15,7 +19,18 @@ MORA Library
   - Inspection Tool
 
 * Use Case Examples
-  - HAR
-  - SLD
+  How did MORA help us to acchieve the goals?
+  - HAR (HH)
+  - SLD (CS)
 
-* Lessons Learned
+* Discussion
+  - Lessons Learned e.g. Formats, Threading, Control Flow
+
+* Related Work
+  - FUNF
+  - SDCF
+
+* Summary / Conclusion (MT)
+
+### TODO
+- Screen Deliverables and Wiki and copy usable pages.
