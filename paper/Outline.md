@@ -34,3 +34,4 @@ MORA - A toolkit for data collection and analysis for mobile phones
 
 ### TODO
 - Screen Deliverables and Wiki and copy usable pages.
+- Conference: MDM 2015 - http://mdmconferences.org/mdm2014/ 
