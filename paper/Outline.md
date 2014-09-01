@@ -4,27 +4,21 @@ MORA - A toolkit for data collection and analysis for mobile phones
 * Abstract (HH)
 
 * Introduction (MT)
-  - Quantified Self
-  - Internet of Things
-
-* Background
-  - Sensors
-  - Technologies (Android)
+  - Much sensor data from smartphones available.
+  - Problem: Extract sensible information from raw data. E.g. for
+    - Quantified Self
+    - Internet of Things
+  - Need tools for gathering test data and evaluation of algorithms: MORA.
 
 * Component Description (CS, HH)
-  - Mobile Component
-  - SSF Format
-  - REST Endpoint
-  - Storage Backend (Postgres - tuning?)
-  - Inspection Tool
+  - Architecture Overview + Image
+  - Mobile Component + GUI Figure
+  - Storage Backend (HTTP, Postgres, ZMQ Streaming)
+  - Inspection Tool + Figure
 
 * Use Case Examples
-  How did MORA help us to acchieve the goals?
   - HAR (HH)
   - SLD (CS)
-
-* Discussion
-  - Lessons Learned e.g. Formats, Threading, Control Flow
 
 * Related Work
   - FUNF
