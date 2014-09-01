@@ -46,28 +46,106 @@ University Koblenz \\
 \end{abstract}
 
 %-------------------------------------------------------------------------
-\Section{Introduction}
-
+\Section{Introduction} %% MT
+- Much sensor data from smartphones available.
+- Problem: Extract sensible information from raw data. E.g. for
+  - Quantified Self
+  - Internet of Things
+- Need tools for gathering test data and evaluation of algorithms: MORA.
 
 %-------------------------------------------------------------------------
-\Section{Component Descriptions}
+\Section{MORA Toolkit}
+* Goals: What should MORA do?
 
-\SubSection{Architecture Overview}
+\SubSection{Overview}
+* How are the goals achieved?
+* Three separate components
+* What is done on the mobile device? What is done on the server?
+
+* Figure: With three components: Mobile - Server - Web
 
 \SubSection{Mobile Sensor Collector}
+* Figure: new GUI from Lukas
+
+* Goals and 'Requirements'
+  - Correctness of data / good performance
+  - View sensor data as events, that are logged / streamed / processed
+  - Extensible by analysis plugins
+  - Transfer of sensor data to server
+
+* Service + Example GUI (Communication with Intent bindings)
+  - Android lifecycle forces collector to be a service
+  - Standalone use of service possible and intended
+
+* Available Sensors. Types of sensors. Class Hierarchy.
+
+* Data flow from Sensor Event to Log file,
+  in analogy to logging frameworks.
+  Use of Threads
+
+* Transfer via HTTP and Streaming
+
+* Configuration options with configuration file and GUI
+
+* Log messages are written to a file
+
+* Extendability with Plugins: Consumer/Producer. Examples:
+  - HAR
+  - GPS Cache
+  - Intent producer
 
 \SubSection{Sensor Storage Server}
 
-\SubSection{Inspection Tool}
+* HTTP server (tomcat/Node), that accepts POST request
 
+* Stores in FS and in DB
+
+* Sends 200 Status code if insert in db complete
+
+* JSF Data Exchange Format
+
+* Auto Creation of DB Tables for new sample types (JSON data type)
+
+\SubSection{Web Inspection Tool}
++ Figure: Screenshot mit Bar-Code Anzeige von Activities
+
+* Purpose: View on DB tables for inspection of raw data
+  and results of data mining.
+  - Which recordings have made it to the db? Transfer successful?
+  - Rough measure for Quality of recorded data. Constant frequency? Accuracy of GPS? can be judged from plots.
+  - Simple export of sample bulks as CSV for processing with other applications.
+  - Inspection of data mining results.
+  - Privacy Aspects. Give users control over the data.
+
+* Features:
+  - Browser based
+  - Zoom
+  - Views:
+    - Plots of time series data (e.g. accelerometer)
+    - Map based views of GPS data
+    - Lists of textual data (tags)
+    - Bar-Code-like view of Tags
+    - Map markers of tags
+  - Delete recordings
+  - Automatic display of available tables
+    -> as text (TEXT) or plot (float)
+
+* Mining output has to be stored in db
+  - Can be created on mobile device and inserted into transfer file
+  - Or can be done on the server
 
 %-------------------------------------------------------------------------
-\Section{Practice Examples}
+\Section{Practical Examples}
 
 \SubSection{Human Activity Recognition}
+* Decision tree learning with WEKA
+* Import classifier as JAVA class into MORA Library
 
 \SubSection{Service Line Detection}
-
+* Web service for SLD
+* GPS Samples are gathered via MORA lib
+* Query results are inserted back into MORA
+* Analysis of classification results via inspection tool
 
 %-------------------------------------------------------------------------
 \Section{Related Work}
