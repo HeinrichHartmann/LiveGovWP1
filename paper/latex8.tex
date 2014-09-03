@@ -60,15 +60,38 @@ University Koblenz \\
 %-------------------------------------------------------------------------
 \Section{MORA Toolkit}
 
-* Goals: What should MORA do?
+The MORA toolkit provides a simple mean to record, transfer, store and
+analyze sensor data from Android mobile phones. In the following
+sections we given an overview about the overall architecture and
+discuss the design choices of the individual components.
 
 \SubSection{Overview}
 
+Design goals of the MORA toolkit:
+\begin{itemize}
+\item Simple codebase. New developers should be able to contribute easily.
+\item Low CPU usage on the mobile device (Battery efficiency, and allow high frequency recordings).
+\item Data visualization and export tools included, to enable data mining and analysis in later steps.
+\item Privacy awareness. Give the users control over their data.
+\item Provide plugin interface e.g. for mobile data mining.
+\item Reuse of existing standards and technologies. JSON. Postgres. NodeJS.
+\end{itemize}
+
+The Toolkit consists of three components:
+\begin{itemize}
+\item \textbf{Mobile Sensor Collector}.  Records great varity of
+  sensors. Flexible event loop/dispatcher - design. Essentially single
+  threaded. Plugins storage, bulk transfer and streaming built-in.
+\item \textbf{Sensor Storage Service}.
+  Receives data over HTTP or ZeroMQ, inserts into Database and File System.
+\item \textbf{Data Inspection Service}.  Gives convenient view on data
+  stored in database. Allows users to keep control over their data.
+\end{itemize}
+
+Flexible serialization format {\bf Json Sensor Format}.
+
+
 * How are the goals achieved?
-
-* Three separate components
-
-* What is done on the mobile device? What is done on the server?
 
 \begin{figure}[h]
 \includegraphics[width=\linewidth]{img/system_overview.png}
@@ -78,7 +101,24 @@ University Koblenz \\
 
 \SubSection{Mobile Sensor Collector}
 
-* Figure: new GUI from Lukas
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3cm]{img/sc_gui.png}
+\end{center}
+% TODO: Replace by Lukas new GUI
+\caption{Mobile Sensor Collector GUI}
+\label{mobile}
+\end{figure}
+
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=\linewidth]{img/sc_architecture.jpg}
+\end{center}
+% TODO: Replace by Lukas new GUI
+\caption{Mobile Sensor Collector Architecture}
+\label{mobile}
+\end{figure}
 
 * Goals and 'Requirements'
   - Correctness of data / good performance
@@ -120,7 +160,8 @@ University Koblenz \\
 * Auto Creation of DB Tables for new sample types (JSON data type)
 
 \SubSection{Web Inspection Tool}
-\url{liveandgov.uni-koblenz.de/storage/inspection}
+
+% http://liveandgov.uni-koblenz.de/storage/inspection
 
 + Figure: Screenshot mit Bar-Code Anzeige von Activities
 
