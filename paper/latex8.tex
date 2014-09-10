@@ -166,9 +166,15 @@ Flexible serialization format {\bf Json Sensor Format}.
 + Figure: Screenshot mit Bar-Code Anzeige von Activities
 
 
-An important step that should be considered before any data mining task is a manual data exploration. For this purpose, MORA provides a powerful data inspection tool. Using this web-based tool, both raw data and mining results can be viewed in the browser. Thus, a first overview of the data integrity can be obtained quickly. Especially in combination with mobile devices, occasionally appearing transmission errors can be discovered easily by the user. In addition, plots for all sensor type give a rough measure for the quality of the recorded data. With the help of this presentation we could, for example, discover GPS inaccuracies or frequency deviations. Besides time series plots and map based views of GPS data the inspection tool offers a bar-code-like representation (Figure~\ref{fig:barcode}) which is able to display a large number of tags on a time axis. To get more details all views can be zoomed in and out. On each zoom level the corresponding data of the displayed interval can be exported as CSV.
+An important step that should be considered before any data mining task is a manual data exploration phase. For this purpose, MORA provides a powerful data inspection tool. Using the web-based front end, a first overview of the data integrity can be obtained quickly. Both raw data and mining results can be viewed in the browser. Occasionally appearing transmission errors caused by the interaction of mobile phones and the back end, can be discovered easily by the user. In addition, plots for all sensor types give a rough measure for the quality of the recorded data. With the help of this presentation we could, for example, discover GPS inaccuracies or frequency deviations. Besides time series plots and map based views of GPS data the inspection tool offers a bar-code-like representation (Figure~\ref{fig:inspection}) which is able to display a large number of tags on a time axis. To get more details all views can be zoomed in and out. On each zoom level the corresponding data of the displayed interval can be exported and downloaded as CSV.
 
-  
+
+\begin{figure}[h]
+\includegraphics[width=\linewidth]{img/BarcodeScreenshot.png}
+\caption{Bar-code-like representation of activities in the MORA inspection front end.}
+\label{fig:inspection}
+\end{figure}
+
   - Simple export of sample bulks as CSV for processing with other applications.
   - Privacy Aspects. Give users control over the data.
 
