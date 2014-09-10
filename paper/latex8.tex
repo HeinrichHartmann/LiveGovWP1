@@ -90,7 +90,6 @@ The Toolkit consists of three components:
 
 Flexible serialization format {\bf Json Sensor Format}.
 
-
 * How are the goals achieved?
 
 \begin{figure}[h]
@@ -146,14 +145,40 @@ Flexible serialization format {\bf Json Sensor Format}.
   - HAR
   - GPS Cache
   - Intent producer
+\SubSection{The JSON Sensor Format (JSF)}
 
-\SubSection{Sensor Storage Server}
+Data transfer is one of the key features offered by the MORA toolkit, therefore we have spent considerbale effort in optimizing our serialization format.
+After experiments with \href{http://www.w3.org/XML/}{XML}, \href{http://tools.ietf.org/html/rfc4180}{CSV} and the \href{http://en.wikipedia.org/wiki/Common_Log_Format}{Common Log Format} we finnaly settled for a JSON based format, which we call {\em JSON Sensor Format} (JSF).
 
-* HTTP server (tomcat/Node), that accepts POST request
+The file format is human readable, so it can be quickly inspected for debugging. At the same time verbosity is limited, avoiding too much transfer-overhead.
+The adherence to the JSON standard allows the reuse of existing parsers, validators and scripting tools, which is very important for us.
+The format is line based and stateless which allws streaming over sockets or message queues, where lines can be dropped or even interleaved with lines from other recordings, without being invalidated.
 
-* Stores in FS and in DB
+An example JSF file looks as follows:
+\begingroup
+\fontsize{9pt}{10pt}\selectfont
+\begin{verbatim}
+["ACC", 1410360212231, "Max", [0.1, 0.5,-9.8]]
+["MAG", 1410360213142, "Max", [1.0,-0.2, 0.2]]
+\end{verbatim}
+\endgroup
+The first field contains a sensor type identifier (e.g. ``ACC'' referres to the accelerometer sensor). 
+The second field is the unix timestamp of the recorded event in milliseconds.
+The third field contains a user name.
 
-* Sends 200 Status code if insert in db complete
+
+\SubSection{Sensor Storage Service}
+
+The sensor storage service allows to gather and persist the recorded sensor samples on a central location.
+To do so it opens an HTTP endpoint that accepts POST requests with ``multipart/form-data'' attachment, containing sensor data in the JSF format.
+There requests are indentical to those used by browsers to upload files in HTML Forms (cf. \href{https://www.ietf.org/rfc/rfc1867.txt}{RFC1867}).
+The service allows (gzip) compression and (SSL) encryption of the uploaded data.
+Two implementations of the sensor storage service are included, one as \href{http://nodejs.org}{Node.js}-application the other \href{https://www.jcp.org/en/jsr/detail?id=154}{Java-Servlet} running on \href{http://tomcat.apache.org/}{Apache Tomcat 7} webserver.
+
+Once a valid POST request is received, the service stores the file in a dedicated folder on the file system and inserts the data into a \href{http://www.postgresql.org/}{PostgreSQL 9.3} database.
+Only if both insertions completed successfully a {\em 200 OK} response is sent back to the client.
+
+The Node.js implementation of the sensor storage service, comes with a dynamic management of the database scheme.
 
 * JSF Data Exchange Format
 
