@@ -65,7 +65,7 @@ analyze sensor data from Android mobile phones. In the following
 sections we given an overview about the overall architecture and
 discuss the design choices of the individual components.
 
-\SubSection{Overview}
+% \SubSection{Overview}
 
 Design goals of the MORA toolkit:
 \begin{itemize}
@@ -79,7 +79,7 @@ Design goals of the MORA toolkit:
 
 The Toolkit consists of three components:
 \begin{itemize}
-\item \textbf{Mobile Sensor Collector}.  Records great varity of
+\item \textbf{Sensor Collection App}.  Records great varity of
   sensors. Flexible event loop/dispatcher - design. Essentially single
   threaded. Plugins storage, bulk transfer and streaming built-in.
 \item \textbf{Sensor Storage Service}.
@@ -98,76 +98,94 @@ Flexible serialization format {\bf Json Sensor Format}.
 \label{overview}
 \end{figure}
 
+
 \SubSection{Mobile Sensor Collector}
 
-\begin{figure}[h]
+The Mobile Sensor Collector is an \href{http://www.androdi.com}{Andorid} App, that allows the recording of data from a varity of sensors avaialble on modern smart phones.
+It consists of a background service that performs the actual recording, and a GUI activity (cf. Figure \ref{fig:gui}) that allows convenient usage of the service.
+A list of supported sensor types can be found in Table \ref{fig:sensors}.
+It is also possible to integrate the sensor collection service into other applications using an API.
+
+In the most basic use case the sensor collection service receives sensor samples form the Android system, serializes them to the JSF format described in Section \ref{sec:jsf} and stores the serialized samples on the local file system.
+On request the stored samples are transferred via HTTP to a server running the Sensor Storage Service described in Section \ref{sec:storage}.
+
+In addition to this basic functionality the service allows direct streaming using the \href{http://zeromq.org/}{ZeroMQ} messaging library and arbitrary processing of the recorded samples using a plugin interface.
+As an example, we have used such a plugin to detect human activitites (e.g. running, sitting, standing) from accelerometer data (cf. Section \ref{sec:HAR}).
+
+The general arichtecture is inspired by event logging and aggregation frameworks like \href{http://www.rsyslog.com/}{rsyslog} or \href{http://logstash.net/}{logstash}.
+We view incoming sensor samples as events that we can persist in a log file, process or stream to a remote location.
+Simplicity and performance were the main design goals of the application.
+A slim architecture should avoid the loss of sensor data due to processing overhead and
+allow new developers to understand the codebase quickly.
+In particular, we avoid the use a database on the mobile device but write directly to a flat file.
+
+\begin{figure}[t]
 \begin{center}
 \includegraphics[width=3cm]{img/sc_gui.png}
 \end{center}
 % TODO: Replace by Lukas new GUI
 \caption{Mobile Sensor Collector GUI}
-\label{mobile}
+\label{fig:gui}
 \end{figure}
 
-
-\begin{figure}[h]
+\begin{table}
 \begin{center}
-\includegraphics[width=\linewidth]{img/sc_architecture.jpg}
+\begin{tabular}{lll}
+Sensor Name   & Type Prefix  & Frequency \\ \hline
+Accelerometer & ACC          & 50 Hz  \\
+Gyroscope     & GYR          & 50 Hz  \\
+Magnetometer  & MAG          & 10 Hz  \\
+WiFi          & WIFI         & every 5 sec. \\
+GSM           & GSM          & every 5 sec.  \\
+Bluetooth     & BLT          & every 5 sec.  \\
+GPS           & GPS          & every 5 sec.
+\end{tabular}
 \end{center}
-% TODO: Replace by Lukas new GUI
-\caption{Mobile Sensor Collector Architecture}
-\label{mobile}
-\end{figure}
+\caption{Supported Sensor Types}
+\label{fig:sensors}
+\end{table}
 
-* Goals and 'Requirements'
-  - Correctness of data / good performance
-  - View sensor data as events, that are logged / streamed / processed
-  - Extensible by analysis plugins
-  - Transfer of sensor data to server
+%% QUESTION:
+%%
+%% Include a more thorough discussion of the inner workings of the collector?
+%% - Event Loops
+%% - Threads
+%% - Queues
+%% ???
+%%
 
-* Service + Example GUI (Communication with Intent bindings)
-  - Android lifecycle forces collector to be a service
-  - Standalone use of service possible and intended
+%% \begin{figure}[h]
+%% \begin{center}
+%% \includegraphics[width=\linewidth]{img/sc_architecture.jpg}
+%% \end{center}
+%% \caption{Mobile Sensor Collector Architecture}
+%% \label{mobile}
+%% \end{figure}
 
-* Available Sensors. Types of sensors. Class Hierarchy.
-
-* Data flow from Sensor Event to Log file,
-  in analogy to logging frameworks.
-  Use of Threads
-
-* Transfer via HTTP and Streaming
-
-* Configuration options with configuration file and GUI
-
-* Log messages are written to a file
-
-* Extendability with Plugins: Consumer/Producer. Examples:
-  - HAR
-  - GPS Cache
-  - Intent producer
-\SubSection{The JSON Sensor Format (JSF)}
+\SubSection{The JSON Sensor Format (JSF)}\label{sec:jsf}
 
 Data transfer is one of the key features offered by the MORA toolkit, therefore we have spent considerbale effort in optimizing our serialization format.
-After experiments with \href{http://www.w3.org/XML/}{XML}, \href{http://tools.ietf.org/html/rfc4180}{CSV} and the \href{http://en.wikipedia.org/wiki/Common_Log_Format}{Common Log Format} we finnaly settled for a JSON based format, which we call {\em JSON Sensor Format} (JSF).
+After experiments with \href{http://www.w3.org/XML/}{XML}, \href{http://tools.ietf.org/html/rfc4180}{CSV} and the \href{http://en.wikipedia.org/wiki/Common_Log_Format}{Common Log Format} we finnaly settled for a \href{http://www.ietf.org/rfc/rfc4627.txt}{JSON} based format, which we call {\em JSON Sensor Format} (JSF).
 
 The file format is human readable, so it can be quickly inspected for debugging. At the same time verbosity is limited, avoiding too much transfer-overhead.
 The adherence to the JSON standard allows the reuse of existing parsers, validators and scripting tools, which is very important for us.
 The format is line-based and stateless which allws streaming over sockets or message queues, where lines can be dropped or even interleaved with lines from other recordings, without being invalidated.
 
-An example JSF file looks as follows:
+An example JSF file looks as follows
 \begingroup
-\fontsize{9pt}{10pt}\selectfont
+\fontsize{8pt}{10pt}\selectfont
 \begin{verbatim}
-["ACC", 1410360212231, "Max", [0.1, 0.5,-9.8]]
+["ACC", 1410360212231, "Max", [0.1,0.5,-9.8]]
 ["TAG", 1410360213142, "Max", "Riding bus."]
 \end{verbatim}
 \endgroup
-The first field contains a sensor type identifier (e.g. ``ACC'' referres to the accelerometer sensor). 
+
+\noindent The first field contains a sensor type identifier (e.g. ``ACC'' referres to the accelerometer sensor). 
 The second field is the unix timestamp of the recorded event in milliseconds.
 The third field contains a user name.
 The last field is is a general JSON object, that represents the value of the recorded sensor event.
 
-\SubSection{Sensor Storage Service}
+\SubSection{Sensor Storage Service}\label{sec:storage}
 
 The sensor storage service allows to gather and persist the recorded sensor samples on a central location.
 To do so it opens an HTTP endpoint that accepts POST requests with ``multipart/form-data'' attachment, containing sensor data in the JSF format.
@@ -179,15 +197,12 @@ Once a valid POST request is received, the service stores the file in a dedicate
 Only if both insertions completed successfully a {\em 200 OK} response is sent back to the client.
 
 The Node.js implementation of the sensor storage service, comes with a dynamic management of the database scheme.
-When a JSON file with an unknown sensor type is received a new table is created that hold the 
-
-* JSF Data Exchange Format
-
-* Auto Creation of DB Tables for new sample types (JSON data type)
+When a JSON file with an unknown sensor type is received a new table is created for this new type which holds the sample value in a JSON column.
+Note that, the JSON datatype became available only recently with \href{http://www.postgresql.org/docs/9.2/static/release-9-2.html}{PostgresSQL 9.2}, and is currently not supported by any other popular open-source relational database management system (e.g. \href{http://www.mysql.com/}{MySQL}, \href{http://www.sqlite.org/}{SQLite}).
+This is one of the main reason for our choice of PostgreSQL as storage solution.
 
 \SubSection{Web Inspection Tool}
 
-% http://liveandgov.uni-koblenz.de/storage/inspection
 An important step that should be considered before any data mining task is a manual data exploration phase.
 For this purpose, MORA provides a powerful data inspection tool.
 Using the web-based front end, a first overview of the data integrity can be obtained quickly.
@@ -215,8 +230,6 @@ On each zoom level the corresponding data of the displayed interval can be expor
 Via the web interface, all users have access to their recorded data and are entitled to delete their tracks if necessary.
 Apart from the possibility to carry out small maintenance tasks, this give users the control over their data and thus enhances the privacy.
 
-
-
   - Automatic display of available tables
     - as text (TEXT) or plot (float)
 
@@ -227,7 +240,7 @@ Apart from the possibility to carry out small maintenance tasks, this give users
 %-------------------------------------------------------------------------
 \Section{Practical Examples}
 
-\SubSection{Human Activity Recognition}
+\SubSection{Human Activity Recognition} \label{sec:HAR}
 * Decision tree learning with WEKA
 * Import classifier as JAVA class into MORA Library
 
