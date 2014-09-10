@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,8 +42,7 @@ import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.ACTION_
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_ACTIVITY;
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_ANNOTATION;
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_HAR;
-import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_ID;
-import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_SAMPLES_STORED;
+import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_STATUS_ID;
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_SAMPLING;
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.FIELD_TRANSFERRING;
 import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.RECORDING_DISABLE;
@@ -60,7 +58,6 @@ import static eu.liveandgov.wp1.sensor_collector.configuration.IntentAPI.RETURN_
  * Created by hartmann on 9/26/13.
  */
 public class ActivitySensorCollector extends Activity {
-    private static final String LOG_TAG = "ASC";
     private BroadcastReceiver universalBroadcastReceiver;
 
     // MIRRORED FLAGS
@@ -212,13 +209,13 @@ public class ActivitySensorCollector extends Activity {
         intent.setAction(ACTION_ANNOTATE);
         intent.putExtra(FIELD_ANNOTATION, annotation);
         startService(intent);
-        Toast.makeText(this, "Adding annotation: " + annotation, 3).show();
+        Toast.makeText(this, "Adding annotation: " + annotation, Toast.LENGTH_SHORT).show();
     }
 
     public void onIdButtonClick(View view) {
         Intent intent = new Intent(this, ServiceSensorControl.class);
         intent.setAction(ACTION_SET_ID);
-        intent.putExtra(FIELD_ID, idText.getText().toString());
+        intent.putExtra(FIELD_STATUS_ID, idText.getText().toString());
         startService(intent);
     }
 
@@ -360,14 +357,6 @@ public class ActivitySensorCollector extends Activity {
         }
 
         // logStatus(intent);
-    }
-
-    private void logStatus(Intent intent) {
-        Log.d("STATUS", "SAMPLING:       " + intent.getBooleanExtra(FIELD_SAMPLING, false));
-        Log.d("STATUS", "TRANSFERRING:   " + intent.getBooleanExtra(FIELD_TRANSFERRING, false));
-        Log.d("STATUS", "SAMPLES_STORED: " + intent.getBooleanExtra(FIELD_SAMPLES_STORED, false));
-        Log.d("STATUS", "HAR:            " + intent.getBooleanExtra(FIELD_HAR, false));
-        Log.d("STATUS", "ID:             " + intent.getStringExtra(FIELD_ID));
     }
 
     @Override

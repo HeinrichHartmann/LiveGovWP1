@@ -1,7 +1,6 @@
 package eu.liveandgov.wp1.sensor_collector.transfer;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -11,6 +10,7 @@ import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +18,9 @@ import java.io.IOException;
 
 import eu.liveandgov.wp1.sensor_collector.GlobalContext;
 import eu.liveandgov.wp1.sensor_collector.R;
+import eu.liveandgov.wp1.sensor_collector.ServiceSensorControl;
+import eu.liveandgov.wp1.sensor_collector.configuration.SensorCollectionOptions;
+import eu.liveandgov.wp1.sensor_collector.logging.LogPrincipal;
 import eu.liveandgov.wp1.sensor_collector.persistence.Persistor;
 import eu.liveandgov.wp1.util.LocalBuilder;
 
@@ -31,7 +34,7 @@ import eu.liveandgov.wp1.util.LocalBuilder;
  * Created by hartmann on 8/30/13.
  */
 public class TransferThreadPost implements Runnable, TransferManager {
-    public static String LOG_TAG = "TransferThreadPost";
+    private final Logger log = LogPrincipal.get();
 
     private Thread thread;
 
@@ -45,12 +48,10 @@ public class TransferThreadPost implements Runnable, TransferManager {
         thread = new Thread(this);
     }
 
-    ;
-
     @Override
     public void doTransfer() {
         if (thread.isAlive()) {
-            Log.i(LOG_TAG, "Already running.");
+            log.info("Already running.");
             return;
         }
         if (thread.getState() == Thread.State.TERMINATED) thread = new Thread(this);
@@ -93,16 +94,16 @@ public class TransferThreadPost implements Runnable, TransferManager {
         try {
 
             // TODO: Check methods if with success return should rather throw an exception in
-            // order to make calleing more uniform.
+            // order to make calling more uniform.
 
 
             // get stage file
             if (stageFile.exists()) {
-                Log.i(LOG_TAG, "Found old stage file.");
+                log.info("Found old stage file.");
             } else {
                 success = persistor.exportSamples(stageFile);
                 if (!success) {
-                    Log.i(LOG_TAG, "Staging failed");
+                    log.error("Staging failed");
                     return;
                 }
             }
@@ -112,27 +113,27 @@ public class TransferThreadPost implements Runnable, TransferManager {
             // transfer staged File
             success = transferFile(stageFile, isCompressed);
             if (!success) {
-                Log.i(LOG_TAG, "Transfer failed");
+                log.error("Transfer failed");
                 return;
             }
 
             // delete local copy
             success = stageFile.delete();
             if (!success) {
-                Log.i(LOG_TAG, "Deletion failed");
+                log.error("Deletion failed");
                 return;
             }
 
             // terminate
-            Log.i(LOG_TAG, "Transfer finished successfully");
+            log.info("Transfer finished successfully");
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error opening stage file", e);
+            log.error("Error opening stage file", e);
         }
     }
 
     private boolean infereCompressionStatusOf(File stageFile) throws IOException {
-        Log.i(LOG_TAG, "Inferring compression of " + stageFile);
+        log.info("Inferring compression of " + stageFile);
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(stageFile);
@@ -151,7 +152,7 @@ public class TransferThreadPost implements Runnable, TransferManager {
     public boolean transferFile(File file, boolean compressed) {
         try {
             String dst = getAddress();
-            Log.d(LOG_TAG, "Destination of upload is: " + dst);
+            log.info("Destination of upload is: " + dst);
 
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(dst);
@@ -164,22 +165,22 @@ public class TransferThreadPost implements Runnable, TransferManager {
             httppost.addHeader("COMPRESSED", String.valueOf(compressed));
             httppost.addHeader("CHECKSUM", String.valueOf(file.length()));
             httppost.addHeader("ID", GlobalContext.getUserId());
+            httppost.addHeader("SECRET", getSecret());
 
             HttpResponse response = httpclient.execute(httppost);
-            Log.v(LOG_TAG, "Response of upload: " + EntityUtils.toString(response.getEntity()));
+            log.info("Response of upload: " + EntityUtils.toString(response.getEntity()));
 
             int status = response.getStatusLine().getStatusCode();
             if (status != HttpStatus.SC_ACCEPTED) {
-                Log.d(LOG_TAG, "Upload failed w/ Status Code:" + status);
+                log.error("Upload failed w/ Status Code:" + status);
                 return false;
             }
 
         } catch (HttpHostConnectException e) {
-            Log.i(LOG_TAG, "Connection Refused");
-            e.printStackTrace();
+            log.error("Connection Refused", e);
             return false;
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("IO exception occured", e);
             return false;
         }
         return true;
@@ -188,10 +189,13 @@ public class TransferThreadPost implements Runnable, TransferManager {
     private String getAddress() {
         SharedPreferences settings = GlobalContext.context.getSharedPreferences(GlobalContext.context.getString(R.string.spn), 0);
 
-        String uploadAddressValue = settings.getString(GlobalContext.context.getString(R.string.prf_upload_address), null);
-        String theUploadAddress = uploadAddressValue == null ? GlobalContext.context.getString(R.string.default_upload_address) : uploadAddressValue;
+        return settings.getString(GlobalContext.context.getString(R.string.prf_upload_address), SensorCollectionOptions.DEFAULT_UPLOAD);
+    }
 
-        return theUploadAddress;
+    private String getSecret() {
+        SharedPreferences settings = GlobalContext.context.getSharedPreferences(GlobalContext.context.getString(R.string.spn), 0);
+
+        return settings.getString(GlobalContext.context.getString(R.string.prf_secret), "");
     }
 
     public boolean transferFile(File file) {

@@ -16,7 +16,7 @@ import eu.liveandgov.wp1.sensor_collector.connectors.impl.SensorEmitter;
  * Pipeline class that consumes accelerometer values and produces an activity stream.
  * Created by hartmann on 10/20/13.
  */
-public class HARAdapter implements Consumer<Item> {
+public class    HARAdapter implements Consumer<Item> {
     private static final String LOG_TAG = "HARA";
     private final ClassFilter<Acceleration> filter;
     private final HARPipeline harPipeline;
@@ -28,6 +28,7 @@ public class HARAdapter implements Consumer<Item> {
         filter = new ClassFilter<Acceleration>(Acceleration.class);
 
         harPipeline = new HARPipeline(1000);
+
         filter.setConsumer(harPipeline);
 
         // Emission

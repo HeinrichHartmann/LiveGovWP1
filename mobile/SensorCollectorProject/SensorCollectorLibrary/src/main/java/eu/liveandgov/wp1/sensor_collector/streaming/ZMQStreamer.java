@@ -1,7 +1,9 @@
 package eu.liveandgov.wp1.sensor_collector.streaming;
 
 import android.content.SharedPreferences;
-import android.util.Log;
+
+import org.apache.log4j.Logger;
+import org.zeromq.ZMQ;
 
 import eu.liveandgov.wp1.data.Callback;
 import eu.liveandgov.wp1.data.Item;
@@ -10,10 +12,9 @@ import eu.liveandgov.wp1.pipeline.impl.ZMQClient;
 import eu.liveandgov.wp1.sensor_collector.GlobalContext;
 import eu.liveandgov.wp1.sensor_collector.R;
 import eu.liveandgov.wp1.sensor_collector.configuration.SensorCollectionOptions;
+import eu.liveandgov.wp1.sensor_collector.logging.LogPrincipal;
 import eu.liveandgov.wp1.sensor_collector.monitor.Monitorable;
 import eu.liveandgov.wp1.util.LocalBuilder;
-
-import org.zeromq.ZMQ;
 
 /**
  * String-Consumer that sends samples to a remote server as lines using ZMQ message queue system.
@@ -21,8 +22,7 @@ import org.zeromq.ZMQ;
  * Created by hartmann on 10/2/13.
  */
 public class ZMQStreamer extends ZMQClient implements Monitorable {
-
-    public static final String LOG_TAG = "ZST";
+    private final Logger log = LogPrincipal.get();
 
     /**
      * Pull interval can be slow because we don't expect responses
@@ -35,7 +35,7 @@ public class ZMQStreamer extends ZMQClient implements Monitorable {
         addressUpdated.register(new Callback<String>() {
             @Override
             public void call(String s) {
-                Log.d(LOG_TAG, "ZMQ Streamer destination now " + s);
+                log.debug( "ZMQ Streamer destination now " + s);
             }
         });
     }
@@ -63,14 +63,9 @@ public class ZMQStreamer extends ZMQClient implements Monitorable {
     protected String getAddress() {
         SharedPreferences settings = GlobalContext.context.getSharedPreferences(GlobalContext.context.getString(R.string.spn), 0);
 
-        String streamingAddressValue = settings.getString(GlobalContext.context.getString(R.string.prf_streaming_address), null);
-        String theStreamingAddress = streamingAddressValue == null ? GlobalContext.context.getString(R.string.default_streaming_address) : streamingAddressValue;
+        String streamingAddressValue = settings.getString(GlobalContext.context.getString(R.string.prf_streaming_address), SensorCollectionOptions.DEFAULT_STREAMING);
 
-        int streaminPortValue = settings.getInt(GlobalContext.context.getString(R.string.prf_streaming_port), Integer.MIN_VALUE);
-        int theStreamingPort = streaminPortValue == Integer.MIN_VALUE ? Integer.valueOf(GlobalContext.context.getString(R.string.default_streaming_port)) : streaminPortValue;
-
-
-        return "tcp://" + theStreamingAddress + ":" + theStreamingPort;
+        return "tcp://" + streamingAddressValue;
     }
 
     @Override
